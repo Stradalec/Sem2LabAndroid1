@@ -21,6 +21,8 @@ class WeatherViewModel(
     private val _forecastData = MutableLiveData<List<ForecastItem>>()
     val forecastData: LiveData<List<ForecastItem>> = _forecastData
 
+    private val _toastMessage = MutableLiveData<String?>()
+    val toastMessage: LiveData<String?> = _toastMessage
 
     fun fetchWeather(city: String) {
         val apiKey = resources.getString(R.string.key)
@@ -28,15 +30,27 @@ class WeatherViewModel(
 
         call.enqueue(object : Callback<Forecast> {
             override fun onResponse(call: Call<Forecast>, response: Response<Forecast>) {
+                when {
+                    response.code() == 404 ->
+                        _toastMessage.value = "Город '$city' не найден"
+                    response.body() == null ->
+                        _toastMessage.value = "Ошибка формата данных"
+                }
                 if (response.isSuccessful) {
-                    _forecastData.value = response.body()?.list
+                    response.body()?.list?.let {
+                        _forecastData.value = it
+                    }
                 }
             }
 
             override fun onFailure(call: Call<Forecast>, t: Throwable) {
-
+                _toastMessage.value = "Ошибка сети: ${t.localizedMessage}"
             }
         })
+    }
+
+    fun onToastShown() {
+        _toastMessage.value = null
     }
 }
 

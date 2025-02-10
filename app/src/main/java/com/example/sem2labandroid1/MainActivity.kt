@@ -2,9 +2,11 @@ package com.example.sem2labandroid1
 
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -53,6 +55,14 @@ class MainActivity : AppCompatActivity() {
             data?.let { adapter.submitList(it) }
         }
 
+        viewModel.toastMessage.observe(this) { message ->
+            message?.let {
+                Toast.makeText(this, it, Toast.LENGTH_LONG).apply {
+                    setGravity(Gravity.CENTER, 0, 0)
+                }.show()
+                viewModel.onToastShown()
+            }
+        }
 
         findViewById<Button>(R.id.btnGetWeather).setOnClickListener {
             val city = findViewById<EditText>(R.id.etCity).text.toString()
