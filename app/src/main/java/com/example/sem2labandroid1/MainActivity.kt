@@ -19,52 +19,34 @@ import retrofit2.http.Query
 import java.io.Serializable
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var viewModel: WeatherViewModel
     private lateinit var adapter: ForecastAdapter
     private var forecastData: List<ForecastItem>? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-        val weatherStore = WeatherStore()
-        val recyclerView: RecyclerView = findViewById(R.id.rView)
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://api.openweathermap.org/data/2.5/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+        viewModel = WeatherViewModel(
+            retrofit.create(OpenWeatherMapService::class.java),
+            resources
+        )
         adapter= ForecastAdapter(ForecastDiffCallback())
+        findViewById<RecyclerView>(R.id.rView).apply {
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            adapter = this@MainActivity.adapter
+        }
 
-        recyclerView.adapter = adapter
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        if (weatherStore.weathers != null) {
-            adapter.submitList(weatherStore.weathers)
-        } else {
-            val retrofit = Retrofit.Builder()
-                .baseUrl("https://api.openweathermap.org/data/2.5/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
-
-            val service = retrofit.create(OpenWeatherMapService::class.java)
-
-            val apiKey = resources.getString(R.string.key)
-            val city = "Шклов"
-            val units = "metric"
-
-            val call = service.getForecast(city, units, apiKey)
-
-            val toolbar = findViewById<Toolbar>(R.id.toolbar)
-            setSupportActionBar(toolbar)
+        viewModel.forecastData.observe(this) { data ->
+            data?.let { adapter.submitList(it) }
+        }
 
 
-            call.enqueue(object : Callback<Forecast> {
-                override fun onResponse(call: retrofit2.Call<Forecast>, response: Response<Forecast>) {
-                    if (response.isSuccessful) {
-                        val forecast = response.body()
-                        forecast?.apply {
-                            weatherStore.weathers = list
-                            adapter.submitList(list)
-                        }
-                    }
-                }
-
-                override fun onFailure(call: retrofit2.Call<Forecast>, t: Throwable) {
-                }
-            })
+        if (savedInstanceState == null) {
+            viewModel.fetchWeather()
         }
 
     }
@@ -81,15 +63,8 @@ class MainActivity : AppCompatActivity() {
         forecastData = savedInstanceState?.getSerializable("forecastData") as? List<ForecastItem>
 
 
-        adapter.submitList(forecastData)
+        viewModel.forecastData.observe(this) { data ->
+            data?.let { adapter.submitList(it) }
+        }
     }
-}
-
-interface OpenWeatherMapService {
-    @GET("forecast")
-    fun getForecast(
-        @Query("q") city: String,
-        @Query("units") units: String,
-        @Query("appid") apiKey: String
-    ): Call<Forecast>
 }
