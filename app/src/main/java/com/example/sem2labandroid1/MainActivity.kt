@@ -2,6 +2,9 @@ package com.example.sem2labandroid1
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -9,6 +12,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -26,27 +30,35 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+
         val retrofit = Retrofit.Builder()
             .baseUrl("https://api.openweathermap.org/data/2.5/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
+
         viewModel = WeatherViewModel(
             retrofit.create(OpenWeatherMapService::class.java),
             resources
         )
+
         adapter= ForecastAdapter(ForecastDiffCallback())
         findViewById<RecyclerView>(R.id.rView).apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = this@MainActivity.adapter
         }
 
+
+
         viewModel.forecastData.observe(this) { data ->
             data?.let { adapter.submitList(it) }
         }
 
 
-        if (savedInstanceState == null) {
-            viewModel.fetchWeather()
+        findViewById<Button>(R.id.btnGetWeather).setOnClickListener {
+            val city = findViewById<EditText>(R.id.etCity).text.toString()
+            if (city.isNotEmpty()) {
+                viewModel.fetchWeather(city)
+            }
         }
 
     }

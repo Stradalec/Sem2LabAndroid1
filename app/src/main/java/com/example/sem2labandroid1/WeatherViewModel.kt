@@ -22,15 +22,14 @@ class WeatherViewModel(
     val forecastData: LiveData<List<ForecastItem>> = _forecastData
 
 
-
-    fun fetchWeather(city: String = "Шклов") {
+    fun fetchWeather(city: String) {
         val apiKey = resources.getString(R.string.key)
         val call = service.getForecast(city, "metric", apiKey)
 
         call.enqueue(object : Callback<Forecast> {
             override fun onResponse(call: Call<Forecast>, response: Response<Forecast>) {
                 if (response.isSuccessful) {
-                    _forecastData.value = response.body()?.list ?: emptyList()
+                    _forecastData.value = response.body()?.list
                 }
             }
 

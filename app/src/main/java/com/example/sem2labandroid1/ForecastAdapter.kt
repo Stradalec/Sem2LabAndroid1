@@ -38,23 +38,32 @@ class ForecastAdapter(private val diffCallback: ForecastDiffCallback) :
 
     class ViewHolderHot(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bind(forecastItem: ForecastItem) {
+            // Работаем с элементами forecast_item.xml
             itemView.findViewById<TextView>(R.id.date).text = forecastItem.dt_txt
-            itemView.findViewById<TextView>(R.id.temperature).text = forecastItem.main.temp.toString()
-            val iconUrl = "https://openweathermap.org/img/wn/${forecastItem.weather[0].icon}@2x.png"
+            itemView.findViewById<TextView>(R.id.temperature).text = "${forecastItem.main.temp}°C"
+            itemView.findViewById<TextView>(R.id.pressure).text = "${forecastItem.main.pressure} hPa"
+
             Glide.with(itemView.context)
-                .load(iconUrl)
+                .load("https://openweathermap.org/img/wn/${forecastItem.weather[0].icon}@2x.png")
                 .into(itemView.findViewById(R.id.temperature_icon))
         }
     }
 
     class ViewHolderCold(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bind(forecastItem: ForecastItem) {
+
             itemView.findViewById<TextView>(R.id.date).text = forecastItem.dt_txt
-            itemView.findViewById<TextView>(R.id.temperature).text = forecastItem.main.temp.toString()
-            val iconUrl = "https://openweathermap.org/img/wn/${forecastItem.weather[0].icon}@2x.png"
+            itemView.findViewById<TextView>(R.id.temperature).text = "${forecastItem.main.temp}°C"
+            itemView.findViewById<TextView>(R.id.pressure).text = "${forecastItem.main.pressure} hPa"
+
+
             Glide.with(itemView.context)
-                .load(iconUrl)
+                .load("https://openweathermap.org/img/wn/${forecastItem.weather[0].icon}@2x.png")
                 .into(itemView.findViewById(R.id.temperature_icon))
+
+
+            itemView.setBackgroundColor(Color.parseColor("#80B1FF"))
+            itemView.setPadding(16, 16, 16, 16) // Фиксированные отступы в пикселях
         }
     }
 
