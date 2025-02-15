@@ -7,6 +7,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import android.widget.ToggleButton
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -37,22 +38,28 @@ class MainActivity : AppCompatActivity() {
             .baseUrl("https://api.openweathermap.org/data/2.5/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-
         viewModel = WeatherViewModel(
             retrofit.create(OpenWeatherMapService::class.java),
             resources
         )
 
-        adapter= ForecastAdapter(ForecastDiffCallback())
+        adapter = ForecastAdapter(ForecastDiffCallback(), viewModel)
         findViewById<RecyclerView>(R.id.rView).apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = this@MainActivity.adapter
         }
 
-
-
         viewModel.forecastData.observe(this) { data ->
             data?.let { adapter.submitList(it) }
+        }
+
+        viewModel.isCelsius.observe(this) { isCelsius ->
+            findViewById<ToggleButton>(R.id.toggleTempUnit).isChecked = !isCelsius
+            adapter.notifyDataSetChanged()
+        }
+
+        findViewById<ToggleButton>(R.id.toggleTempUnit).setOnCheckedChangeListener { _, isChecked ->
+            viewModel.toggleTemperatureUnit()
         }
 
         viewModel.toastMessage.observe(this) { message ->

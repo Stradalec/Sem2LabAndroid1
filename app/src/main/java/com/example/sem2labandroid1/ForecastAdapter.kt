@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 
-class ForecastAdapter(private val diffCallback: ForecastDiffCallback) :
+class ForecastAdapter(private val diffCallback: ForecastDiffCallback,  private val viewModel: WeatherViewModel) :
     ListAdapter<ForecastItem, RecyclerView.ViewHolder>(diffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -21,11 +21,11 @@ class ForecastAdapter(private val diffCallback: ForecastDiffCallback) :
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val forecastItem = getItem(position)
         if (holder is ViewHolderHot) {
-            holder.bind(forecastItem)
+            holder.bind(forecastItem, viewModel)
             holder.itemView.setPadding(0,0, 0, 0)
             holder.itemView.setBackgroundColor(Color.parseColor("#FFC080"))
         } else if (holder is ViewHolderCold) {
-            holder.bind(forecastItem)
+            holder.bind(forecastItem, viewModel)
             holder.itemView.setPadding(5,5, 5, 5)
             holder.itemView.setBackgroundColor(Color.parseColor("#80B1FF"))
         }
@@ -37,10 +37,11 @@ class ForecastAdapter(private val diffCallback: ForecastDiffCallback) :
     }
 
     class ViewHolderHot(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        fun bind(forecastItem: ForecastItem) {
-            // Работаем с элементами forecast_item.xml
+        fun bind(forecastItem: ForecastItem, viewModel: WeatherViewModel) {
             itemView.findViewById<TextView>(R.id.date).text = forecastItem.dt_txt
-            itemView.findViewById<TextView>(R.id.temperature).text = "${forecastItem.main.temp}°C"
+            val temperature = viewModel.convertTemperature(forecastItem.main.temp)
+            val unit = if (viewModel.isCelsius.value == true) "°C" else "°F"
+            itemView.findViewById<TextView>(R.id.temperature).text = "%.1f%s".format(temperature, unit)
             itemView.findViewById<TextView>(R.id.pressure).text = "${forecastItem.main.pressure} hPa"
 
             Glide.with(itemView.context)
@@ -50,10 +51,12 @@ class ForecastAdapter(private val diffCallback: ForecastDiffCallback) :
     }
 
     class ViewHolderCold(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        fun bind(forecastItem: ForecastItem) {
+        fun bind(forecastItem: ForecastItem, viewModel: WeatherViewModel) {
 
             itemView.findViewById<TextView>(R.id.date).text = forecastItem.dt_txt
-            itemView.findViewById<TextView>(R.id.temperature).text = "${forecastItem.main.temp}°C"
+            val temperature = viewModel.convertTemperature(forecastItem.main.temp)
+            val unit = if (viewModel.isCelsius.value == true) "°C" else "°F"
+            itemView.findViewById<TextView>(R.id.temperature).text = "%.1f%s".format(temperature, unit)
             itemView.findViewById<TextView>(R.id.pressure).text = "${forecastItem.main.pressure} hPa"
 
 
@@ -63,7 +66,7 @@ class ForecastAdapter(private val diffCallback: ForecastDiffCallback) :
 
 
             itemView.setBackgroundColor(Color.parseColor("#80B1FF"))
-            itemView.setPadding(16, 16, 16, 16) // Фиксированные отступы в пикселях
+            itemView.setPadding(16, 16, 16, 16)
         }
     }
 
