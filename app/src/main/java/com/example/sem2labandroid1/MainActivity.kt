@@ -9,10 +9,12 @@ import android.widget.TextView
 import android.widget.Toast
 import android.widget.ToggleButton
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -24,11 +26,11 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
 import java.io.Serializable
+import androidx.fragment.app.viewModels
 
 class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: WeatherViewModel
     private lateinit var adapter: ForecastAdapter
-    private var forecastData: List<ForecastItem>? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -39,7 +41,7 @@ class MainActivity : AppCompatActivity() {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
         viewModel = WeatherViewModel(
-            retrofit.create(OpenWeatherMapService::class.java),
+            RetrofitClient.weatherService,
             resources
         )
 
@@ -79,21 +81,6 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        if (forecastData != null) {
-            outState.putSerializable("forecastData", forecastData as Serializable)
-        }
-
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        forecastData = savedInstanceState?.getSerializable("forecastData") as? List<ForecastItem>
 
 
-        viewModel.forecastData.observe(this) { data ->
-            data?.let { adapter.submitList(it) }
-        }
-    }
 }
