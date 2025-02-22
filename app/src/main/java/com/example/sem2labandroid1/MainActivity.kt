@@ -29,21 +29,15 @@ import java.io.Serializable
 import androidx.fragment.app.viewModels
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var viewModel: WeatherViewModel
+    private val viewModel: WeatherViewModel by viewModels()
     private lateinit var adapter: ForecastAdapter
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
-        val retrofit = Retrofit.Builder()
-            .baseUrl("https://api.openweathermap.org/data/2.5/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-        viewModel = WeatherViewModel(
-            RetrofitClient.weatherService,
-            resources
-        )
+
+
 
         adapter = ForecastAdapter(ForecastDiffCallback(), viewModel)
         findViewById<RecyclerView>(R.id.rView).apply {

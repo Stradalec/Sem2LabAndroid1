@@ -12,8 +12,7 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 class WeatherViewModel(
-    private val service: OpenWeatherMapService,
-    private val resources: Resources
+    private val service: OpenWeatherMapService = RetrofitClient.weatherService
 ) : ViewModel() {
 
     private val _forecastData = MutableLiveData<List<ForecastItem>>()
@@ -26,7 +25,7 @@ class WeatherViewModel(
     val isCelsius: LiveData<Boolean> = _isCelsius
 
     fun fetchWeather(city: String) {
-        val apiKey = resources.getString(R.string.key)
+        val apiKey = "ab1700c1546c934f4cdc73aeab7eb4d3"
         val call = service.getForecast(city, "metric", apiKey)
 
         call.enqueue(object : Callback<Forecast> {
