@@ -25,8 +25,7 @@ class WeatherViewModel(
     val isCelsius: LiveData<Boolean> = _isCelsius
 
     fun fetchWeather(city: String) {
-        val apiKey = "ab1700c1546c934f4cdc73aeab7eb4d3"
-        val call = service.getForecast(city, "metric", apiKey)
+        val call = service.getForecast(city)
 
         call.enqueue(object : Callback<Forecast> {
             override fun onResponse(call: Call<Forecast>, response: Response<Forecast>) {
@@ -62,11 +61,4 @@ class WeatherViewModel(
     }
 }
 
-interface OpenWeatherMapService {
-    @GET("forecast")
-    fun getForecast(
-        @Query("q") city: String,
-        @Query("units") units: String,
-        @Query("appid") apiKey: String
-    ): Call<Forecast>
-}
+

@@ -36,36 +36,17 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
-
-
-
         adapter = ForecastAdapter(ForecastDiffCallback(), viewModel)
-        findViewById<RecyclerView>(R.id.rView).apply {
-            layoutManager = LinearLayoutManager(this@MainActivity)
-            adapter = this@MainActivity.adapter
-        }
 
-        viewModel.forecastData.observe(this) { data ->
-            data?.let { adapter.submitList(it) }
-        }
-
-        viewModel.isCelsius.observe(this) { isCelsius ->
-            findViewById<ToggleButton>(R.id.toggleTempUnit).isChecked = !isCelsius
-            adapter.notifyDataSetChanged()
-        }
+        recyclerView()
+        observeList()
+        celsiumObserve()
+        observeMessage()
 
         findViewById<ToggleButton>(R.id.toggleTempUnit).setOnCheckedChangeListener { _, isChecked ->
             viewModel.toggleTemperatureUnit()
         }
 
-        viewModel.toastMessage.observe(this) { message ->
-            message?.let {
-                Toast.makeText(this, it, Toast.LENGTH_LONG).apply {
-                    setGravity(Gravity.CENTER, 0, 0)
-                }.show()
-                viewModel.onToastShown()
-            }
-        }
 
         findViewById<Button>(R.id.btnGetWeather).setOnClickListener {
             val city = findViewById<EditText>(R.id.etCity).text.toString()
@@ -75,6 +56,34 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+    private fun recyclerView() {
+        findViewById<RecyclerView>(R.id.rView).apply {
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            adapter = this@MainActivity.adapter
+        }
+    }
 
+    private fun observeList() {
+        viewModel.forecastData.observe(this) { data ->
+            data?.let { adapter.submitList(it) }
+        }
+    }
 
+    private fun celsiumObserve() {
+        viewModel.isCelsius.observe(this) { isCelsius ->
+            findViewById<ToggleButton>(R.id.toggleTempUnit).isChecked = !isCelsius
+            adapter.notifyDataSetChanged()
+        }
+    }
+
+    private fun observeMessage() {
+        viewModel.toastMessage.observe(this) { message ->
+            message?.let {
+                Toast.makeText(this, it, Toast.LENGTH_LONG).apply {
+                    setGravity(Gravity.CENTER, 0, 0)
+                }.show()
+                viewModel.onToastShown()
+            }
+        }
+    }
 }
